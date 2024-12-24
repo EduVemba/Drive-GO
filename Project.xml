@@ -1,0 +1,34 @@
+<Project>
+    <name>Uber in Golang</name>
+    <models>
+        Person(F_name string, L_name string ,DateBirth time.Time, Address string ,Local string)
+        Driver(Person, Registration string)
+        *Country(name string, code string)*
+        Enum Vehicle(prices)
+        VehicleFee(type Vehicle)
+    </models>
+    <Database>
+        <PostgresSQL>
+            When the auth is implemented
+            <Tables>
+                Person;
+                *Country;*
+                Driver.
+            </Tables>
+        </PostgresSQL>
+        <MongoDb>
+            Travels_Info(Origin string, PassengerID int, DriverId int, Status []string,cost float, Registration varchar, Destiny) -- When a travel request is accepted the data go to here
+        </MongoDb>
+    </Database>
+    <Auth.Auto>Authentication and authorization</Auth.Auto>
+    <SystemDesign>
+        Observer: For the Drivers and when the passenger is accepted
+        Strategy: When a passenger want another type of vehicle
+    </SystemDesign>
+    <Assunto>
+        In this project will build Uber copy with auth for the drivers when
+        a request for travel is intent a driver in the same range is updated.
+        They can pay with cards like vise with cryptocurrency later on
+        <branch> User can pay with cryptocurrency it will be converted with chainlink oracle </branch>
+    </Assunto>
+</Project>
