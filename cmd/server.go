@@ -2,10 +2,15 @@ package main
 
 import (
 	"d_uber_golang/internal/Controllers"
+	"d_uber_golang/internal/Database/MongoDB"
 	"d_uber_golang/internal/routes"
 	"log"
 	"net/http"
 )
+
+func init() {
+	MongoDB.Connect()
+}
 
 func main() {
 
