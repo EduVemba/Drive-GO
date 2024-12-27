@@ -1,6 +1,7 @@
 package main
 
 import (
+	"d_uber_golang/internal/Authentication"
 	"d_uber_golang/internal/Controllers"
 	"d_uber_golang/internal/Database/MongoDB"
 	"d_uber_golang/internal/routes"
@@ -13,7 +14,10 @@ func init() {
 }
 
 func main() {
-
+	http.HandleFunc(routes.DRIVERREGISTER, Authentication.RegisterDriver)
+	http.HandleFunc(routes.LOGINDRIVER, Authentication.LoginDriver)
+	http.HandleFunc(routes.REGISTER, Authentication.Register)
+	http.HandleFunc(routes.LOGIN, Authentication.Login)
 	http.HandleFunc(routes.CREATE_REQUEST_INTENT, Controllers.CreateTravelIntent)
 	http.HandleFunc(routes.ACCPET_REQUEST_INTENT, Controllers.GetTravelIntent)
 
