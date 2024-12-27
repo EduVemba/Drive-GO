@@ -20,7 +20,7 @@
             Travels_Info(Origin string, PassengerID int, DriverId int, Status []string,cost float, Registration varchar, Destiny) -- When a travel request is accepted the data go to here
         </MongoDb>
     </Database>
-    <Auth.Auto>Authentication and authorization</Auth.Auto>
+    <Auth.Autorization>Authentication and authorization</Auth.Autorization>
     <SystemDesign>
         Observer: For the Drivers and when the passenger is accepted
         Strategy: When a passenger want another type of vehicle

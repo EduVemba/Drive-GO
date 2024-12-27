@@ -1,8 +1,11 @@
 package models
 
 type DriverUser struct {
-	Person       `json:"request_user_model"`
-	registration string `json:"registration"`
+	FirstName    string `json:"first_name"`
+	LastName     string `json:"last_name"`
+	Email        string `json:"email"`
+	Password     string `json:"password"`
+	SessionToken string `json:"session_token"`
+	CSRFToken    string `json:"csrf_token"`
+	Registration string `json:"registration"`
 }
-
-func AcceptRequester(conreteRequester Person) {}

@@ -1,4 +1,3 @@
 package models
 
-type Vehicle struct {
-}
+type Vehicle struct{}

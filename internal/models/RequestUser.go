@@ -3,23 +3,34 @@ package models
 import "time"
 
 type Person struct {
-	firstName string    `json:"first_name"`
-	lastName  string    `json:"last_name"`
-	dateBirth time.Time `json:"date_birth"`
-	timeStamp time.Time `json:"time_stamp"`
-	address   string    `json:"address"`
-	local     string    `json:"local"`
+	FirstName    string    `json:"first_name"`
+	LastName     string    `json:"last_name"`
+	Email        string    `json:"email"`
+	Password     string    `json:"password"`
+	SessionToken string    `json:"session_token"`
+	CSRFToken    string    `json:"csrf_token"`
+	DateBirth    time.Time `json:"date_birth"`
 }
 
-func CreateRequester(firstname, lastname, local string) Person {
-	concretePerson := Person{firstName: firstname, lastName: lastname, timeStamp: time.Now()}
+/*
+func CreateRequester(firstname, lastname, email string, time time.Time) Person {
+	concretePerson := Person{FirstName: firstname, LastName: lastname, Email: email, TimeStamp: time}
 	return concretePerson
 }
 
-func (p *Person) getName() string {
-	return p.firstName + " " + p.lastName
+*/
+
+func (p *Person) GetName() string {
+	return p.FirstName + " " + p.LastName
 }
 
-func (p *Person) getAddress() string {
-	return p.address
+/*
+func (p *Person) GetAddress() string {
+	return p.Address
+}
+
+*/
+
+func (p *Person) GetEmail() string {
+	return p.Email
 }
