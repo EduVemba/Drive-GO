@@ -13,18 +13,21 @@ const dbName = "Uber_Go"
 const coolRequest = "Request"
 const coolResponse = "Response"
 
-var Collections = make(map[string]*mongo.Collection)
+var (
+	client      *mongo.Client
+	Collections = make(map[string]*mongo.Collection)
+)
 
 func Connect() {
 	clientOptions := options.Client().ApplyURI(connectionString)
 
-	connect, err := mongo.Connect(context.TODO(), clientOptions)
+	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	Collections["requests"] = connect.Database(dbName).Collection(coolRequest)
-	Collections["responses"] = connect.Database(dbName).Collection(coolResponse)
+	Collections["requests"] = client.Database(dbName).Collection(coolRequest)
+	Collections["responses"] = client.Database(dbName).Collection(coolResponse)
 
 	fmt.Println("Connected to MongoDB!")
 }
@@ -59,4 +62,15 @@ func InsertOneResponse(content interface{}) error {
 
 func GetCollection(collectionName string) *mongo.Collection {
 	return Collections[collectionName]
+}
+
+func Close() {
+	if client != nil {
+		err := client.Disconnect(context.Background())
+		if err != nil {
+			log.Printf("Erro ao desconectar do MongoDB: %v", err)
+		} else {
+			log.Println("Conexão com MongoDB fechada com sucesso.")
+		}
+	}
 }

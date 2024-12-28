@@ -1,7 +1,6 @@
-package Services
+package Authentication
 
 import (
-	"d_uber_golang/internal/Authentication"
 	"errors"
 	"net/http"
 )
@@ -10,7 +9,7 @@ var AuthError = errors.New("Unauthorized")
 
 func Authorize(r *http.Request) error {
 	email := r.FormValue("email")
-	user, ok := Authentication.Users[email]
+	user, ok := Users[email]
 	if !ok {
 		return AuthError
 	}

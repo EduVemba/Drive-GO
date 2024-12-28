@@ -4,16 +4,19 @@ import (
 	"d_uber_golang/internal/Authentication"
 	"d_uber_golang/internal/Controllers"
 	"d_uber_golang/internal/Database/MongoDB"
+	"d_uber_golang/internal/Database/PostgreSQL"
 	"d_uber_golang/internal/routes"
 	"log"
 	"net/http"
 )
 
-func init() {
-	MongoDB.Connect()
-}
-
 func main() {
+	MongoDB.Connect()
+	defer MongoDB.Close()
+
+	PostgreSQL.Connect()
+	defer PostgreSQL.Close()
+
 	http.HandleFunc(routes.DRIVERREGISTER, Authentication.RegisterDriver)
 	http.HandleFunc(routes.LOGINDRIVER, Authentication.LoginDriver)
 	http.HandleFunc(routes.REGISTER, Authentication.Register)

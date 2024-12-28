@@ -1,7 +1,6 @@
 package Authentication
 
 import (
-	"d_uber_golang/internal/Services"
 	"d_uber_golang/internal/models"
 	"d_uber_golang/internal/routes"
 	"d_uber_golang/internal/utils"
@@ -157,7 +156,7 @@ func Protected(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid Request Method.", http.StatusMethodNotAllowed)
 	}
-	if err := Services.Authorize(r); err != nil {
+	if err := Authorize(r); err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 	}
 
@@ -167,7 +166,7 @@ func Protected(w http.ResponseWriter, r *http.Request) {
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
-	if err := Services.Authorize(r); err != nil {
+	if err := Authorize(r); err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 	}
 	http.SetCookie(w, &http.Cookie{
