@@ -4,6 +4,7 @@ import (
 	"d_uber_golang/internal/models"
 	"d_uber_golang/internal/routes"
 	"d_uber_golang/internal/utils"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -13,49 +14,95 @@ var Users = map[string]models.Person{}
 
 var Drivers = map[string]models.DriverUser{}
 
+/*
+* Normal User Register function
+ */
 func Register(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Login should require a Post method", http.StatusMethodNotAllowed)
 		return
 	}
 
-	firstName := r.FormValue("firstName")
-	lastName := r.FormValue("lastName")
-	email := r.FormValue("email")
-	password := r.FormValue("password")
-	if utils.IsEmailValid(email) || len(password) < 8 || len(firstName) < 3 || len(lastName) < 3 {
-		http.Error(w, "Invalid credentials", http.StatusBadRequest)
+	var input struct {
+		FirstName string `json:"first_name"`
+		LastName  string `json:"last_name"`
+		Email     string `json:"email"`
+		Password  string `json:"password"`
 	}
+
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
+	}
+
+	firstName := input.FirstName
+	lastName := input.LastName
+	email := input.Email
+	password := input.Password
+
+	if firstName == "" || lastName == "" || email == "" || password == "" {
+		http.Error(w, "All fields are required", http.StatusBadRequest)
+		return
+	}
+
+	if !utils.IsEmailValid(email) || len(password) < 8 || len(firstName) < 3 || len(lastName) < 3 {
+		http.Error(w, "Invalid credentials", http.StatusBadRequest)
+		return
+	}
+
 	if _, ok := Users[email]; ok {
 		http.Error(w, "User already exists", http.StatusConflict)
+		return
 	}
 
 	hashedPassword, _ := utils.HashPassword(password)
 	Users[email] = models.Person{
 		Password: hashedPassword,
 	}
+	// Insert of the user in the Postgres HERE
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("User Created"))
 }
 
+/*
+* Driver user Register function
+ */
 func RegisterDriver(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Register should require a Post method", http.StatusMethodNotAllowed)
 		return
 	}
-	firstName := r.FormValue("firstName")
-	lastName := r.FormValue("lastName")
-	email := r.FormValue("email")
-	password := r.FormValue("password")
-	registration := r.FormValue("registration")
 
-	if utils.IsEmailValid(email) || len(password) < 8 ||
+	var input struct {
+		FirstName    string `json:"first_name"`
+		LastName     string `json:"last_name"`
+		Email        string `json:"email"`
+		Password     string `json:"password"`
+		Registration string `json:"registration"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
+	}
+
+	firstName := input.FirstName
+	lastName := input.LastName
+	email := input.Email
+	password := input.Password
+	registration := input.Registration
+
+	if firstName == "" || lastName == "" || email == "" || password == "" || registration == "" {
+		http.Error(w, "All fields are required", http.StatusBadRequest)
+		return
+	}
+
+	if !utils.IsEmailValid(email) || len(password) < 8 ||
 		len(firstName) < 3 ||
 		len(lastName) < 3 ||
-		utils.IsValidRegistration(registration) {
+		!utils.IsValidRegistration(registration) {
 		http.Error(w, "Invalid credentials", http.StatusBadRequest)
 		return
 	}
+
 	if _, ok := Drivers[email]; ok {
 		http.Error(w, "User already exists", http.StatusConflict)
 		return
@@ -65,18 +112,31 @@ func RegisterDriver(w http.ResponseWriter, r *http.Request) {
 	Drivers[email] = models.DriverUser{
 		Password: hashedPassword,
 	}
+	// Insert of the user in the Postgres HERE
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("Driver Created"))
 }
 
+/*
+* Normal User Login function
+ */
 func Login(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Login should require a Post method", http.StatusMethodNotAllowed)
 		return
 	}
 
-	email := r.FormValue("email")
-	password := r.FormValue("password")
+	var input struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
+	}
+
+	email := input.Email
+	password := input.Password
 
 	user, ok := Users[email]
 	if !ok || !utils.CheckPasswordHash(password, user.Password) {
@@ -110,13 +170,26 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Welcome Back!"))
 }
 
+/*
+* Driver user Login function
+ */
 func LoginDriver(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Login should require a Post method", http.StatusMethodNotAllowed)
+		return
 	}
 
-	email := r.FormValue("email")
-	password := r.FormValue("password")
+	var input struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
+	}
+
+	email := input.Email
+	password := input.Password
 
 	drivers, ok := Drivers[email]
 	if !ok || !utils.CheckPasswordHash(password, drivers.Password) {
@@ -155,9 +228,11 @@ func LoginDriver(w http.ResponseWriter, r *http.Request) {
 func Protected(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid Request Method.", http.StatusMethodNotAllowed)
+		return
 	}
 	if err := Authorize(r); err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
 	}
 
 	fname := r.FormValue("firstname")
@@ -168,6 +243,7 @@ func Protected(w http.ResponseWriter, r *http.Request) {
 func Logout(w http.ResponseWriter, r *http.Request) {
 	if err := Authorize(r); err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
 	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",

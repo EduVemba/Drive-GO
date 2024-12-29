@@ -2,11 +2,11 @@ package Services
 
 import (
 	"context"
+	"d_uber_golang/internal/Authentication"
 	"d_uber_golang/internal/Database/MongoDB"
 	"encoding/json"
 	"go.mongodb.org/mongo-driver/bson"
 	"net/http"
-	"sync"
 	"time"
 )
 
@@ -22,7 +22,7 @@ type UserRequirements struct {
 }
 
 var (
-	mu   sync.Mutex
+	//	mu   sync.Mutex
 	user UserRequirements
 )
 
@@ -52,6 +52,8 @@ func HandlerCreateTravelIntent(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
+
+	Authentication.Protected(w, r)
 
 	w.WriteHeader(http.StatusCreated)
 	err = json.NewEncoder(w).Encode(response)
@@ -96,6 +98,8 @@ func HandlerAcceptRequester(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
+
+	Authentication.Protected(w, r)
 
 	w.WriteHeader(http.StatusAccepted)
 	err = json.NewEncoder(w).Encode(response)
