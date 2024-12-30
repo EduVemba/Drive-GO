@@ -1,6 +1,7 @@
 package Authentication
 
 import (
+	"d_uber_golang/internal/Database/PostgreSQL"
 	"d_uber_golang/internal/models"
 	"d_uber_golang/internal/routes"
 	"d_uber_golang/internal/utils"
@@ -30,6 +31,8 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		Password  string `json:"password"`
 	}
 
+	defer r.Body.Close()
+
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
 	}
@@ -49,7 +52,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, ok := Users[email]; ok {
+	if PostgreSQL.EmailExists(email) {
 		http.Error(w, "User already exists", http.StatusConflict)
 		return
 	}
@@ -58,7 +61,14 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	Users[email] = models.Person{
 		Password: hashedPassword,
 	}
-	// Insert of the user in the Postgres HERE
+
+	psqlFunc := `SELECT registerUser($1, $2, $3, $4)`
+	_, err := PostgreSQL.Db.Exec(psqlFunc, firstName, lastName, email, hashedPassword)
+	if err != nil {
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("User Created"))
 }
@@ -79,6 +89,8 @@ func RegisterDriver(w http.ResponseWriter, r *http.Request) {
 		Password     string `json:"password"`
 		Registration string `json:"registration"`
 	}
+
+	defer r.Body.Close()
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
@@ -103,7 +115,7 @@ func RegisterDriver(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, ok := Drivers[email]; ok {
+	if PostgreSQL.EmailExists(email) {
 		http.Error(w, "User already exists", http.StatusConflict)
 		return
 	}
@@ -112,7 +124,11 @@ func RegisterDriver(w http.ResponseWriter, r *http.Request) {
 	Drivers[email] = models.DriverUser{
 		Password: hashedPassword,
 	}
-	// Insert of the user in the Postgres HERE
+	psqlFunc := `SELECT registerDriver($1, $2, $3, $4, $5)`
+	_, err := PostgreSQL.Db.Exec(psqlFunc, firstName, lastName, email, hashedPassword, registration)
+	if err != nil {
+		http.Error(w, "", http.StatusInternalServerError)
+	}
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("Driver Created"))
 }
@@ -133,6 +149,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
+		return
 	}
 
 	email := input.Email
@@ -166,6 +183,14 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	user.CSRFToken = csrfToken
 	Users[email] = user
 
+	var tablename = "requester"
+	psqlFunc := `SELECT login($1, $2, $3, $4)`
+	_, err := PostgreSQL.Db.Exec(psqlFunc, tablename, email, sessionToken, csrfToken)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(http.StatusAccepted)
 	w.Write([]byte("Welcome Back!"))
 }
@@ -186,6 +211,7 @@ func LoginDriver(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		http.Error(w, "Invalid JSON payload", http.StatusBadRequest)
+		return
 	}
 
 	email := input.Email
@@ -219,6 +245,14 @@ func LoginDriver(w http.ResponseWriter, r *http.Request) {
 	drivers.SessionToken = sessionToken
 	drivers.CSRFToken = csrfToken
 	Drivers[email] = drivers
+
+	var tablename = "driver"
+	psqlFunc := `SELECT login($1, $2, $3, $4)`
+	_, err := PostgreSQL.Db.Exec(psqlFunc, tablename, email, sessionToken, csrfToken)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
 
 	w.WriteHeader(http.StatusAccepted)
 	w.Write([]byte("Welcome Back!"))

@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-var db *sql.DB
+var Db *sql.DB
 
 func init() {
 	err := godotenv.Load()
@@ -35,12 +35,12 @@ func Connect() {
 		host, port, user, password, dbname)
 
 	var err error
-	db, err = sql.Open("postgres", psqlInfo)
+	Db, err = sql.Open("postgres", psqlInfo)
 	if err != nil {
 		log.Fatalf("Error opening the connection with the Database: %v", err)
 	}
 
-	err = db.Ping()
+	err = Db.Ping()
 	if err != nil {
 		log.Fatalf("Error to verify the connection with the Database: %v", err)
 	}
@@ -49,12 +49,40 @@ func Connect() {
 }
 
 func Close() {
-	if db != nil {
-		err := db.Close()
+	if Db != nil {
+		err := Db.Close()
 		if err != nil {
 			log.Printf("Error closing the connection with  PostgreSQL: %v", err)
 		} else {
 			log.Println("Connection with PostgreSQL closed.")
 		}
 	}
+}
+
+func EmailExists(emailT string) bool {
+	psqlUser := `SELECT email from requester where email = $1 `
+	psqlDriver := `SELECT email from driver where email = $1 `
+
+	var email string
+
+	err := Db.QueryRow(psqlUser, emailT).Scan(&email)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			return false
+		}
+
+	} else {
+		return true
+	}
+
+	err = Db.QueryRow(psqlDriver, emailT).Scan(&email)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			return false
+		}
+	} else {
+		return true
+	}
+
+	return false
 }
