@@ -3,5 +3,6 @@
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/internal/Authentication/JWTAuth.go" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/internal/Database/PostgreSQL/PostgresConnection.go" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/internal/utils/utils.go" dialect="GenericSQL" />
   </component>
 </project>

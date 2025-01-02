@@ -51,8 +51,12 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid credentials", http.StatusBadRequest)
 		return
 	}
+	if utils.PasswordExists(password) {
+		http.Error(w, "Account Password already exists", http.StatusBadRequest)
+		return
+	}
 
-	if PostgreSQL.EmailExists(email) {
+	if utils.EmailExists(email) {
 		http.Error(w, "User already exists", http.StatusConflict)
 		return
 	}
@@ -114,8 +118,12 @@ func RegisterDriver(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid credentials", http.StatusBadRequest)
 		return
 	}
+	if utils.PasswordExists(password) {
+		http.Error(w, "Account Password already exists", http.StatusBadRequest)
+		return
+	}
 
-	if PostgreSQL.EmailExists(email) {
+	if utils.EmailExists(email) {
 		http.Error(w, "User already exists", http.StatusConflict)
 		return
 	}
@@ -155,9 +163,9 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	email := input.Email
 	password := input.Password
 
-	user, ok := Users[email]
-	if !ok || !utils.CheckPasswordHash(password, user.Password) {
-		http.Error(w, "User does not exist", http.StatusNotFound)
+	user, _ := Users[email]
+	if !utils.ValidUser(email, password) {
+		http.Error(w, "Account does not exist", http.StatusNotFound)
 		return
 	}
 	sessionToken := utils.GenerateToken(32)
@@ -217,10 +225,9 @@ func LoginDriver(w http.ResponseWriter, r *http.Request) {
 	email := input.Email
 	password := input.Password
 
-	drivers, ok := Drivers[email]
-	if !ok || !utils.CheckPasswordHash(password, drivers.Password) {
-		http.Error(w, "Driver does not exist", http.StatusNotFound)
-		return
+	drivers, _ := Drivers[email]
+	if !utils.ValidDriver(email, password) {
+		http.Error(w, "Account does not exist", http.StatusNotFound)
 	}
 
 	sessionToken := utils.GenerateToken(32)

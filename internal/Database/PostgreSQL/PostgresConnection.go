@@ -58,31 +58,3 @@ func Close() {
 		}
 	}
 }
-
-func EmailExists(emailT string) bool {
-	psqlUser := `SELECT email from requester where email = $1 `
-	psqlDriver := `SELECT email from driver where email = $1 `
-
-	var email string
-
-	err := Db.QueryRow(psqlUser, emailT).Scan(&email)
-	if err != nil {
-		if err != sql.ErrNoRows {
-			return false
-		}
-
-	} else {
-		return true
-	}
-
-	err = Db.QueryRow(psqlDriver, emailT).Scan(&email)
-	if err != nil {
-		if err != sql.ErrNoRows {
-			return false
-		}
-	} else {
-		return true
-	}
-
-	return false
-}
