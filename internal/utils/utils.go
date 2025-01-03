@@ -57,7 +57,6 @@ func ValidDriver(email, password string) bool {
 	query := "SELECT password FROM driver WHERE email = $1"
 	err := PostgreSQL.Db.QueryRow(query, email).Scan(&hashedPassword)
 	if err != nil {
-
 		return false
 	}
 	return CheckPasswordHash(password, hashedPassword)

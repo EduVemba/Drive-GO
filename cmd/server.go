@@ -21,8 +21,8 @@ func main() {
 	http.HandleFunc(routes.LOGINDRIVER, Authentication.LoginDriver)
 	http.HandleFunc(routes.REGISTER, Authentication.Register)
 	http.HandleFunc(routes.LOGIN, Authentication.Login)
-	http.HandleFunc(routes.CREATE_REQUEST_INTENT, Controllers.CreateTravelIntent)
-	http.HandleFunc(routes.ACCPET_REQUEST_INTENT, Controllers.GetTravelIntent)
+	http.HandleFunc(routes.CREATE_REQUEST_INTENT, Authentication.Protected(Controllers.CreateTravelIntent))
+	http.HandleFunc(routes.ACCPET_REQUEST_INTENT, Authentication.Protected(Controllers.GetTravelIntent))
 
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {

@@ -14,8 +14,8 @@ func CreateTravelIntent(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetTravelIntent(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Get required", http.StatusBadRequest)
+	if r.Method != http.MethodPost {
+		http.Error(w, "Post required", http.StatusBadRequest)
 	}
 	Services.HandlerAcceptRequester(w, r)
 }

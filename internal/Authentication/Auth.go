@@ -6,7 +6,6 @@ import (
 	"d_uber_golang/internal/routes"
 	"d_uber_golang/internal/utils"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 )
@@ -266,19 +265,18 @@ func LoginDriver(w http.ResponseWriter, r *http.Request) {
 }
 
 // This Portected func is used in the Services that Require cookies
-func Protected(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid Request Method.", http.StatusMethodNotAllowed)
-		return
+func Protected(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Protected", http.StatusMethodNotAllowed)
+			return
+		}
+		if err := Authorize(r); err != nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		next.ServeHTTP(w, r)
 	}
-	if err := Authorize(r); err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	fname := r.FormValue("firstname")
-	lname := r.FormValue("lastname")
-	fmt.Fprintf(w, "CSRF validation successful! Welcome, %s %s", fname, lname)
 }
 
 func Logout(w http.ResponseWriter, r *http.Request) {
