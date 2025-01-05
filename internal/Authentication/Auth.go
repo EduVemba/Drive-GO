@@ -264,21 +264,6 @@ func LoginDriver(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Welcome Back!"))
 }
 
-// This Portected func is used in the Services that Require cookies
-func Protected(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			http.Error(w, "Protected", http.StatusMethodNotAllowed)
-			return
-		}
-		if err := Authorize(r); err != nil {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-		next.ServeHTTP(w, r)
-	}
-}
-
 func Logout(w http.ResponseWriter, r *http.Request) {
 	if err := Authorize(r); err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)

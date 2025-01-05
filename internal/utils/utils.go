@@ -134,3 +134,11 @@ func PasswordExists(passwordT string) bool {
 	}
 	return false
 }
+
+func ContainsToken(token string) bool {
+	PostgreSQL.Db.QueryRow("SELECT * FROM requester WHERE sessiontoken = $1", token)
+	if token == "" {
+		return false
+	}
+	return true
+}

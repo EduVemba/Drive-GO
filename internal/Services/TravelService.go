@@ -4,6 +4,7 @@ import (
 	"context"
 	"d_uber_golang/internal/Database/MongoDB"
 	"d_uber_golang/internal/Database/PostgreSQL"
+	"d_uber_golang/internal/utils"
 	"database/sql"
 	"encoding/json"
 	"go.mongodb.org/mongo-driver/bson"
@@ -18,14 +19,10 @@ type UserRequirements struct {
 	From         string `json:"from"`
 	To           string `json:"to"`
 
-	//Requester Person  `json:"requester"`
 	TimeStamp time.Time `json:"time_stamp"`
 }
 
-var (
-	//	mu   sync.Mutex
-	user UserRequirements
-)
+var user UserRequirements
 
 func HandlerCreateTravelIntent(w http.ResponseWriter, r *http.Request) {
 
@@ -44,20 +41,11 @@ func HandlerCreateTravelIntent(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	/*
-		if user.From == "" || user.To == "" || user.Email == "" {
-			http.Error(w, "Missing required fields", http.StatusBadRequest)
-			return
-		}
-	*/
-
 	user.SessionToken = r.Header.Get("Authorization")
-	if user.SessionToken == "" {
+	if !utils.ContainsToken(user.SessionToken) {
 		http.Error(w, "Unauthorized - Missing session token", http.StatusUnauthorized)
 		return
 	}
-
-	//	user.SessionToken = user.SessionToken[len("Bearer "):]
 
 	tokenString := strings.TrimPrefix(user.SessionToken, "Bearer ")
 
@@ -113,8 +101,6 @@ func HandlerAcceptRequester(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer r.Body.Close()
-
-	//userEmail := `SELECT `
 
 	if MongoDB.GetCollection("requests").FindOne(context.Background(), bson.M{"email": user.Email}).Err() != nil {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
