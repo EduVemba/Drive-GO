@@ -41,24 +41,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	email := input.Email
 	password := input.Password
 
-	if firstName == "" || lastName == "" || email == "" || password == "" {
-		http.Error(w, "All fields are required", http.StatusBadRequest)
-		return
-	}
-
-	if !utils.IsEmailValid(email) || len(password) < 8 || len(firstName) < 3 || len(lastName) < 3 {
-		http.Error(w, "Invalid credentials", http.StatusBadRequest)
-		return
-	}
-	if utils.PasswordExists(password) {
-		http.Error(w, "Account Password already exists", http.StatusBadRequest)
-		return
-	}
-
-	if utils.EmailExists(email) {
-		http.Error(w, "User already exists", http.StatusConflict)
-		return
-	}
+	utils.RegisterHandling(firstName, lastName, email, password)
 
 	hashedPassword, _ := utils.HashPassword(password)
 	Users[email] = models.Person{
